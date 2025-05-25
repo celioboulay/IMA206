@@ -1,5 +1,11 @@
 
+import sys
 import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
+sys.path.insert(0, parent_dir)
+
 import glob
 import random
 import numpy as np
@@ -12,8 +18,8 @@ from torch_geometric.data import Data
 
 from sklearn.cluster import KMeans
 
-from resnet import extract_features
-import visualize
+from utils.resnet import extract_features
+import utils.visualize as visualize
 
 
 
