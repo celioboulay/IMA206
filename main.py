@@ -56,7 +56,7 @@ data.x = F.normalize(data.x, p=2, dim=-1)
 
 input_dim = data.x.shape[1]
 model = GAE(gcn.GCNEncoder(input_dim, 128))
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01) # lr par défaut
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01) # lr pas opti
 
 
 
@@ -76,7 +76,7 @@ limits = [(mid[i] - max_range, mid[i] + max_range) for i in range(3)]
 epochs = 100
 for epoch in range(1, epochs + 1):
     loss = gcn.train_one_epoch(model, optimizer, data)
-    if epoch % 5 == 0:
+    if epoch % 1 == 0:
         model.eval()
         z = model.encode(data.x, data.edge_index).detach().cpu().numpy()
         z_3d = reducer.transform(z)
@@ -98,18 +98,13 @@ print(z.shape)
 
 #############################################################################
 
-#visualize.plot_tsne(z,painters)
-
-#############################################################################
 
 
-
-
-n_clusters=7
+n_clusters=10
 
 
 kmeans = KMeans(n_clusters=n_clusters, random_state=0) # changer de méthode
 labels = kmeans.fit_predict(z)
 
 
-#visualize.plot_all_clusters_images(file_paths_subset, labels, n_clusters=n_clusters, n_images=8, img_size=(2, 1))
+visualize.plot_all_clusters_images(file_paths_subset, labels, n_clusters=n_clusters, n_images=8, img_size=(2, 1))
