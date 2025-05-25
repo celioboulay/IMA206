@@ -25,8 +25,8 @@ from torch_geometric.nn import GAE
 from sklearn.cluster import KMeans
 
 from utils.resnet import extract_features
-import GAE.gcn
-import utils.visualize
+import GAE.gcn as gcn
+import utils.visualize as visualize
 
 
 
