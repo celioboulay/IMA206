@@ -20,7 +20,6 @@ class GCNEncoder(torch.nn.Module):
 
 
 def train_one_epoch(model, optimizer, data):
-    model.train()
     optimizer.zero_grad()
     z = model.encode(data.x, data.edge_index)
     loss = model.recon_loss(z, data.edge_index)
@@ -28,8 +27,9 @@ def train_one_epoch(model, optimizer, data):
     optimizer.step()
     return loss.item()
 
-def train_loop(model, optimizer, data, epochs=300, print_every=50):
-    model.train()
+
+
+def train_model(model, optimizer, data, epochs=300, print_every=50):
     for epoch in range(1, epochs + 1):
         loss = train_one_epoch(model, optimizer, data)
         if epoch % print_every == 0:
