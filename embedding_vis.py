@@ -6,7 +6,6 @@ import numpy as np
 from tqdm import tqdm
 import umap.umap_ as umap
 
-
 import torch
 import torch.nn.functional as F
 from torch_geometric.data import Data

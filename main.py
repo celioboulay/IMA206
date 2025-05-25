@@ -94,8 +94,6 @@ z = model.encode(data.x, data.edge_index).detach().cpu().numpy()   # same shape 
 print(z.shape)
 
 
-
-
 #############################################################################
 
 
