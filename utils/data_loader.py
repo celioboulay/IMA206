@@ -2,23 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import glob
 from PIL import Image
-import torchvision.transforms as transforms
 import torch
 from tqdm import tqdm 
+import transformations_init
 
 class Data_loader(object):
 
-    def __init__(self, file_paths):
+    def __init__(self, file_paths, method):
         self.file_paths = file_paths
         self.images = []
 
 
-        self.transform = transforms.Compose([ # a changer bien sur 
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                std=[0.229, 0.224, 0.225])
-        ])
+        self.transform = method
 
     def load_images(self):
         for file_path in tqdm(self.file_paths, desc="Loading images"):
@@ -40,9 +35,12 @@ class Data_loader(object):
         return patch
 
 
+
+
+
 all_files_paths = glob.glob('/Users/celio/Documents/database/**/*.jpg', recursive=True)
 
-data_loader = Data_loader(all_files_paths[:600])
+data_loader = Data_loader(all_files_paths[:600], method=transformations_init.transform_pas_ouf)
 loaded_images = data_loader.load_images()
 print(data_loader.images[0].size)
 
