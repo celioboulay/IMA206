@@ -10,14 +10,14 @@ class Data_loader(object):
 
     def __init__(self, file_paths, method):
         self.file_paths = file_paths
-        self.images = []
-
-
+        self.images = []  # interet de pas direct charger les images ?
         self.transform = method
+
 
     def load_images(self):
         for file_path in tqdm(self.file_paths, desc="Loading images"):
             try:
+                self.images=[]  # reset pour eviter les problemes
                 self.images.append(Image.open(file_path).convert('RGB'))
             except Exception as e:
                 print(e)
