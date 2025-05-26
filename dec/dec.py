@@ -60,3 +60,14 @@ class TMM(object):
         dist = np.sum((z[:, np.newaxis, :] - mu[np.newaxis, :, :])**2, axis=2)
         num = (1 + dist / self.alpha) ** (-(self.alpha + 1) / 2)
         return num / np.sum(num, axis=1, keepdims=True)
+    
+
+    def clusters_init(self):
+        return 0
+    
+    def forward(self):
+        return 0
+    
+    def compute_distributions():
+        return 0
+    
