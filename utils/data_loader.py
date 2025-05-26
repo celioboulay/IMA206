@@ -23,12 +23,23 @@ class Data_loader(object):
         return self.load_images()
     
 
+    def display_image(self, n_image):
+        Image._show(self.images[n_image])
 
-file_paths = glob.glob('Data/database/afro - afro-basaldella_1912/*.jpg') # test
-data_load = Data_loader(file_paths)
-loaded_images = data_load.load_images()
+
+    def extract_patch(self, image, size, method):
+        patch = None
+
+        return patch
+
+    
+
+
+file_paths = glob.glob('/Users/celio/Documents/database/afro - afro-basaldella_1912/*.jpg')
+data_loader = Data_loader(file_paths)
+loaded_images = data_loader.load_images()
 
 
 
 if loaded_images:
-    print("loaded")
+    data_loader.display_image(2)
