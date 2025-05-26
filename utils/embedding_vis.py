@@ -18,7 +18,7 @@ from torch_geometric.data import Data
 
 from sklearn.cluster import KMeans
 
-from utils.resnet import extract_features
+from features.resnet import extract_features
 import utils.visualize as visualize
 
 

@@ -5,7 +5,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.insert(0, parent_dir)
 
-import utils.resnet as resnet
+import features.resnet as resnet
 
 
 
@@ -62,7 +62,7 @@ class TMM(object):
         return num / np.sum(num, axis=1, keepdims=True)
     
 
-    def clusters_init(self):
+    def clusters_init(self, names=None):
         return 0
     
     def forward(self):
