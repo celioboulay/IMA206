@@ -41,26 +41,3 @@ class CustomDataset(Dataset):
 
 
 ######## A voir pour implementer un héritage CustomDataloader(Dataloader) pour extraire les patchs qu'on veut cf partie de Jean ?
-
-annotations_file = '/Users/celio/Documents/Classeur1.csv'
-img_dir = '/Users/celio/Documents/smalldata'
-annotations_df = pd.read_csv(annotations_file, sep=';')
-
-
-train_df, test_df = train_test_split(annotations_df, test_size=0.2, 
-    stratify=annotations_df.iloc[:, 1],  # colonne labels
-    random_state=42) # random state pour les tests
-
-
-train_dataset = CustomDataset(train_df, img_dir)
-test_dataset = CustomDataset(test_df, img_dir)
-
-
-im, label = test_dataset[20]
-print(im.shape, ' ', label)
-
-
-train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
-
-

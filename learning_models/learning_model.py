@@ -5,7 +5,6 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.insert(0, parent_dir)
 
-
 import numpy as np
 from utils.data_loader import *    # notamment Custom loader dataset
 import pandas as pd
@@ -26,11 +25,19 @@ train_dataset = CustomDataset(train_df, img_dir)
 test_dataset = CustomDataset(test_df, img_dir)
 
 
-im, label = test_dataset[20]
-print(im.shape, ' ', label)
-
 
 train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
 
 
+images, labels = next(iter(train_loader))
+
+batch_size = 4
+fig, axes = plt.subplots(1, batch_size, figsize=(12, 4))
+for i in range(batch_size):
+    img = images[i].permute(1, 2, 0).numpy() # torch tensors de forme [C, H, W] mais matplotlib veut [H, W, C] pour l'affichage
+    ax = axes[i]
+    ax.imshow(img)
+    ax.set_title(f"Label: {train_dataset.classes[labels[i]]}")
+    ax.axis('off')
+plt.show()
