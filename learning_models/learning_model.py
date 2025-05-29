@@ -8,7 +8,7 @@ sys.path.insert(0, parent_dir)
 import numpy as np
 from utils.data_loader import *    # notamment Custom loader dataset
 import pandas as pd
-from Models.sequentials import SimpleCNN
+from Models.sequentials import *
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -81,7 +81,7 @@ else:
     print("Using CPU")
 
 
-model = SimpleCNN(nb_channels, nb_classes).to(device)
+model = CNN_2(nb_channels, nb_classes).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
