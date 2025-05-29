@@ -18,6 +18,7 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from utils.transformations_init import *
 from sklearn.model_selection import train_test_split
 
 
@@ -30,23 +31,39 @@ train_df, test_df = train_test_split(annotations_df, test_size=0.2,
     stratify=annotations_df.iloc[:, 1],  # colonne labels
     random_state=42) # random state pour les tests
 
+######## Test train separes, donc on peut operer directement sur les Customdatasets pour generer plusieurs inputs
 
 
-# Normalisation à appliquer sur le DataLoader
-transform = transforms.Compose([
-    transforms.Resize((256, 256)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5]*3, std=[0.5]*3)
-])
+########## Mettre ci dessous dans une pipeline a part
+#### First data_set
+train_dataset_resized = CustomDataset(train_df, img_dir, transform=transform_high_gradient)
+test_dataset_resized = CustomDataset(test_df, img_dir, transform=transform_high_gradient)
 
-train_dataset = CustomDataset(train_df, img_dir, transform=transform)
-test_dataset = CustomDataset(test_df, img_dir, transform=transform)
+####### Exemple
+
+plt.figure(figsize=(16, 4))
+for i in range(5):
+    img, label = train_dataset_resized[i]
+    img = img.permute(1, 2, 0)  # [C,H,W] -> [H,W,C]
+    img = img * 0.5 + 0.5
+    plt.subplot(1, 5, i+1)
+    plt.imshow(img.numpy())
+    plt.title(f"{label}")
+    plt.axis('off')
+
+plt.tight_layout()
+plt.show()
+
+###################################
+
+
+
 
 
 batch_size=4
 
-train_loader = CustomDataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-test_loader = CustomDataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+train_loader = CustomDataLoader(train_dataset_resized, batch_size=batch_size, shuffle=True)
+test_loader = CustomDataLoader(test_dataset_resized, batch_size=batch_size, shuffle=False)
 
 
 
