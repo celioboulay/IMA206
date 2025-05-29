@@ -1,21 +1,5 @@
-import os
-import random
-from collections import Counter
-
-import cv2
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-from PIL import Image
-from tqdm import tqdm
-
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
-from torch.utils.data import DataLoader, Subset, random_split
-import torchvision.datasets as datasets
-import torchvision.transforms as transforms
 
 from sklearn.model_selection import train_test_split
 
@@ -52,16 +36,3 @@ class SimpleCNN(nn.Module):
         x = self.features(x)
         x = self.classifier(x)
         return x
-
-
-nb_channels = 3
-nb_classes = 2
-learning_rate = 1e-3
-n_epochs = 25
-
-
-model = SimpleCNN(nb_channels, nb_classes)
-
-# Loss and optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=learning_rate)

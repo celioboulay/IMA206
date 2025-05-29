@@ -8,15 +8,8 @@ sys.path.insert(0, parent_dir)
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-import torch
-from tqdm import tqdm
-import torchvision
-import pandas as pd
 from torchvision.io import read_image
 from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms
-from sklearn.model_selection import train_test_split
-import utils.transformations_init
 
 
 class CustomDataset(Dataset):
@@ -43,3 +36,6 @@ class CustomDataset(Dataset):
 
 
 ######## A voir pour implementer un héritage CustomDataloader(Dataloader) pour extraire les patchs qu'on veut cf partie de Jean ?
+
+class CustomDataLoader(DataLoader):
+    pass
