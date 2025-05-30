@@ -10,5 +10,5 @@ Bonjour
 
 ## Pipeline
 #### Deux parties separees
-Learning Models pour l'extraction
+Learning Models pour l'extraction <br>
 Puis on passe dans l'auto encodeur, le bon espace latent tout ça tout ça puis dec.

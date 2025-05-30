@@ -48,7 +48,15 @@ transform_resize_256 = transforms.Compose([
     transforms.Resize((256, 256)),
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(20),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5]*3, std=[0.5]*3)
+])
+
+
+transform_center_256 = transforms.Compose([
+    transforms.CenterCrop(256),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomRotation(20),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5]*3, std=[0.5]*3)
 ])
@@ -56,7 +64,6 @@ transform_resize_256 = transforms.Compose([
 transform_high_gradient = transforms.Compose([
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(20),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),  # le tout avant le high grad
     SelectStrongestGradientPatch(patch_size=256),   # on choisi le patch avec le gradient maximal (eq point d'interet)
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5]*3, std=[0.5]*3)

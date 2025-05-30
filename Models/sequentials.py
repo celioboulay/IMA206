@@ -1,7 +1,9 @@
 import torch.nn as nn
 import torch.optim as optim
-
+import torchvision.models as models
 from sklearn.model_selection import train_test_split
+
+
 
 class SimpleCNN(nn.Module):
     def __init__(self, nb_channels, nb_classes):
@@ -74,5 +76,41 @@ class CNN_2(nn.Module):
     
     def forward(self, x):
         x = self.features(x)
+        x = self.classifier(x)
+        return x
+    
+
+
+
+resnet = models.resnet50(pretrained=True)
+
+features_extractor = nn.Sequential(  # On récupère le début du ResNet jusqu'à layer3
+    resnet.conv1,
+    resnet.bn1,
+    resnet.relu,
+    resnet.maxpool,
+    resnet.layer1,
+    resnet.layer2,
+    resnet.layer3
+)
+for param in features_extractor.parameters():
+    param.requires_grad = False
+
+class CNN3(nn.Module):
+    def __init__(self, nb_classes, base_model=features_extractor):
+        super().__init__()
+        self.features = base_model
+        self.pool = nn.AdaptiveAvgPool2d((1, 1))
+        self.classifier = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(1024, 256),  # 1024 car layer3 sort du 1024 channels
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(256, nb_classes)
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        x = self.pool(x)
         x = self.classifier(x)
         return x

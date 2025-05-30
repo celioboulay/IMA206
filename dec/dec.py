@@ -5,7 +5,6 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.insert(0, parent_dir)
 
-import features.resnet as resnet
 
 
 
@@ -29,8 +28,6 @@ class TMM(object):
         self.tol = 1e-5
         self.alpha = float(alpha)
 
-    def extract_features(self, image_path, model=None):
-        return resnet.extract_features(image_path)   # modifier pour choisir le model si besoin
 
     def cluster_acc(self, Y_pred, Y):
         assert Y_pred.size == Y.size
@@ -42,7 +39,7 @@ class TMM(object):
         return sum([w[i,j] for i,j in ind])*1.0/Y_pred.size, w
     
 
-    def KL(self, p,q): # KL divergence value between p and q
+    def KL(self, p,q): # KL divergence value between p and q    modifier pour prendre des tenseurs en entree, idem pour le reste du code
         S=0
         for i in range(len(p)):
             for j in range(len(p)):
