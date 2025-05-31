@@ -37,5 +37,23 @@ class CustomDataset(Dataset):
 
 ######## A voir pour implementer un héritage CustomDataloader(Dataloader) pour extraire les patchs qu'on veut cf partie de Jean ?
 
+class Paintings_Dataset(Dataset):
+    def __init__(self, img_dir, transform=None):
+        self.img_dir = img_dir
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.img_dir)
+    
+    def __getitem__(self, idx):
+        img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0].replace(';0', ''))
+        image = Image.open(img_path).convert("RGB")
+
+        if self.transform:
+            image = self.transform(image)
+
+        return image
+    
+
 class CustomDataLoader(DataLoader):
     pass

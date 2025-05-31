@@ -39,7 +39,7 @@ train_df, test_df = train_test_split(annotations_df, test_size=0.2,
 
 ########## Mettre ci dessous dans une pipeline a part
 #### First data_set
-train_dataset_resized = CustomDataset(train_df, img_dir, transform=transform_center_256)
+train_dataset_resized = CustomDataset(train_df, img_dir, transform=transform_center_256, )
 test_dataset_resized = CustomDataset(test_df, img_dir, transform=transforms.Compose([transforms.CenterCrop((256, 256)), transforms.ToTensor(), transforms.Normalize(mean=[0.5]*3, std=[0.5]*3)]))
 
 

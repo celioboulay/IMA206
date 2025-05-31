@@ -12,7 +12,6 @@ import cv2
 import numpy as np
 import shutil
 import random
-from google import protobuf
 from xml.dom import minidom
 import matplotlib.pyplot as plt 
 from scipy.optimize import linear_sum_assignment
