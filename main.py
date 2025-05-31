@@ -36,17 +36,17 @@ print(f"Using device: {device}")
 
 weights = ResNet18_Weights.DEFAULT  #### tant qu'on a pas le SAE on fait avec resNet 18......
 model = resnet18(weights=weights)
-model = nn.Sequential(*list(model.children())[:-1])
+f_theta = nn.Sequential(*list(model.children())[:-1])
 
-model.eval()
-model.to(device)
+f_theta.eval()
+f_theta.to(device)
 
 features_list = []
 
 with torch.no_grad():
     for images_batch, _ in dataloader:
         images_batch = images_batch.to(device)
-        outputs = model(images_batch) 
+        outputs = f_theta(images_batch) 
 
         outputs = outputs.view(outputs.size(0), -1) 
 
@@ -72,22 +72,31 @@ for cluster in enumerate(cluster_centers_init):
 ####### cluster_centers_init K initial centroids in feature space Z
 # Maintenant qu'on a cette initialisation, on se refere a la partie 3.1 du papier
 
-pre_trained_SAE = NotImplemented
+nb_epochs=15
+learning_rate = 1e-3
 
-init = pre_trained_SAE(features)
+optimizer = torch.optim.Adam(f_theta.parameters(), lr=learning_rate)
+
+'''
+for epoch in range(nb_epochs):
+    for images, _ in dataloader:
+        z = f_theta(images)
+        q_ij = compute_soft_assignment(z, cluster_centers)  # via Student's t-distribution
+        p_ij = compute_target_distribution(q_ij)
+        loss = kl_divergence(p_ij, q_ij)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+'''
 
 
 ######## on run dec jusqua converence
 
-TMM = dec.TMM()
 
-TMM.forward()
-### en gros la boucle
+###### On compute les embeddings finaux et dernier k-means
 
-
-
-final_features = NotImplemented # TMM.call ou jsp quoi pour avoir le dernier etat des features
-
-######### plot des resultats en dim2 ou 3
+final_embeddings = f_theta(NotImplemented) # TMM.call ou jsp quoi pour avoir le dernier etat des features
+final_labels = kmeans.predict(final_embeddings.detach().numpy())
 
 # visualize(final_features, dim=2)
