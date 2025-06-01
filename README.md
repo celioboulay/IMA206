@@ -1,14 +1,13 @@
 # Projet IMA 206
-Bonjour
+Bonjour 🥵🥵🥵🥵🥵🥵
 
 ## Arborescence
+main : le main
+main_but_on_MNIST : pipeline principale adaptée à MNIST avec AE classique pour faire des tests et comprendre la structure du projet.
 * Data: la data en gros
-* Models: les differentes architectures utilisees dans le projet
-* dec: implementation de l'algo presente dans Deep Embedding Clustering
-* learning_models: la partie d'apprentissage sur les images pour identifier les features qui pourraient nous intéresser
+* Models: les differentes architectures utilisees dans le projet et les models pré-entraînés 
+* dec: implementation de l'algo présenté dans Deep Embedding Clustering
 * utils: les datasets, dataloaders, les tranformations pour les images et divers outils de visualisation.
 
 ## Pipeline
-#### Deux parties separees
-Learning Models pour l'extraction <br>
-Puis on passe dans l'auto encodeur, le bon espace latent tout ça tout ça puis dec.
+Le joli schéma qui arrive 🥵🥵
