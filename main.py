@@ -35,25 +35,19 @@ dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
 
 ####### Collecting input features with a pre trained network
-########## A remplacer par un stacked auto encodeur construit de la bonne maniere (a definir en fonction de ce que nous donne l'apprentissage sur les images)
-from torchvision.models import resnet18, ResNet18_Weights
+from Models.SAE import SAE
 
-model = resnet18(weights=ResNet18_Weights.DEFAULT)     #### tant qu'on a pas le SAE on fait avec resNet 18......
-f_theta = nn.Sequential(*list(model.children())[:-1])
-
-f_theta.eval()
+f_theta = SAE(NotImplemented)
 f_theta.to(device)
+f_theta.eval()
 
-features_list = []
 
 with torch.no_grad():
+    features_list = []
     for images_batch, _ in dataloader:
         images_batch = images_batch.to(device)
-        outputs = f_theta(images_batch) 
-
-        outputs = outputs.view(outputs.size(0), -1) 
-
-        features_list.append(outputs.cpu()) 
+        outputs = f_theta.get_embedding(images_batch)
+        features_list.append(outputs.cpu())
         
 features_tensor = torch.cat(features_list, dim=0)  # shape: (num_images, 512)
 print(features_tensor.shape) # features_tensor embedded data_points, maintenant on fait strandard k-means pour l'init des clusters dans Z
@@ -68,40 +62,50 @@ n_clusters_init = 10
 kmeans = KMeans(n_clusters=n_clusters_init, random_state=0).fit(features_tensor.numpy())
 cluster_centers_init = kmeans.cluster_centers_
 
-for cluster in enumerate(cluster_centers_init):  # cluster_centers_init K initial centroids in feature space Z
-        print(cluster[1].shape)
-
-
 
 ######## Maintenant qu'on a cette initialisation, on se refere a la partie 3.1 du papier
 ######## on run dec jusqua converence
 from dec.dec import TMM
 
+tmm = TMM(n_clusters=n_clusters_init)
+cluster_centers = cluster_centers_init
+
 nb_epochs=15
 learning_rate = 1e-3
 
 optimizer = torch.optim.Adam(f_theta.parameters(), lr=learning_rate)
+cluster_centers_torch = torch.tensor(cluster_centers_init, device=device, dtype=torch.float)
 
-'''   f_theta.train() a mettre je sais plus ou mais chill
-for epoch in range(nb_epochs):
+
+f_theta.train()
+for epoch in tqdm(range(nb_epochs)):
     for images, _ in dataloader:
-        z = f_theta(images)
-        q_ij = compute_soft_assignment(z, cluster_centers)  # via Student's t-distribution
-        p_ij = compute_target_distribution(q_ij)
-        loss = kl_divergence(p_ij, q_ij)
+        images = images.to(device)
+        z = f_theta.get_embedding(images)
+        q = tmm.compute_soft_assignment(z, cluster_centers_torch, alpha=tmm.alpha)
+        p = tmm.compute_target_distribution(q)
+        loss = tmm.KL(p, q)
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-'''
 
 
 
 ###### On compute les embeddings finaux et dernier k-means
 
-final_embeddings = f_theta(NotImplemented) # TMM.call ou jsp quoi pour avoir le dernier etat des features
-final_labels = kmeans.predict(final_embeddings.detach().numpy())
+with torch.no_grad():
+    final_features_list = []
+    for images, _ in dataloader:
+        images = images.to(device)
+        z = f_theta.get_embedding(images)
+        final_features_list.append(z.cpu())
 
+final_embeddings = torch.cat(final_features_list, dim=0)
+
+# Nouveau K-means sur embeddings finaux
+final_kmeans = KMeans(n_clusters=n_clusters_init, random_state=0).fit(final_embeddings.numpy())  # pas besoin de repasser sur cpu
+final_labels = final_kmeans.labels_
 
 
 ####### visualize(final_features, dim=2)
