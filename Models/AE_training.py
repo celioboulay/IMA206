@@ -39,7 +39,7 @@ model.to(device)
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
-n_epochs = 200
+n_epochs = 100  
 for epoch in range(n_epochs):
     model.train()
     epoch_loss = 0
