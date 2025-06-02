@@ -30,7 +30,7 @@ Data/dossier/
         ....
 '''
 dataset = datasets.ImageFolder('Data/smalldata1/', transform=transform_center_256)
-dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=32, shuffle=True) # batch size ? = f(len(dataset)) surement
 
 
 

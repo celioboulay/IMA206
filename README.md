@@ -1,8 +1,8 @@
 # Projet IMA 206
-Bonjour 🥵🥵🥵🥵🥵🥵
+Bonjour 🥵🥵🥵🥵
 
 ## Arborescence
-main : le main
+main : le main <br>
 main_but_on_MNIST : pipeline principale adaptée à MNIST avec AE classique pour faire des tests et comprendre la structure du projet.
 * Data: la data en gros
 * Models: les differentes architectures utilisees dans le projet et les models pré-entraînés 
