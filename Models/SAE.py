@@ -18,7 +18,6 @@ from torchvision import datasets, models
 from torch.utils.data import DataLoader, Dataset
 import torchvision.transforms as transforms
 from utils.transformations_init import transform_center_256
-from sequentials import Autoencoder
 
 ######## Cuda
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -31,37 +30,32 @@ print(f"Using device: {device}")
 
 ################## à mettre dans sequentials
 
-class Autoencoder(nn.Module):
-    def __init__(self, latent_dim=64):
+class AE(nn.Module):
+    def __init__(self, latent_dim=256):
         super().__init__()
-
         self.encoder = nn.Sequential(
-            nn.Conv2d(3, 32, 3, stride=2, padding=1), 
-            nn.ReLU(),
-            nn.Conv2d(32, 64, 3, stride=2, padding=1), 
-            nn.ReLU(),
+            nn.Conv2d(3, 64, 4, stride=2, padding=1), nn.ReLU(),
+            nn.Conv2d(64, 128, 4, stride=2, padding=1), nn.ReLU(),
+            nn.Conv2d(128, 256, 4, stride=2, padding=1), nn.ReLU(),
             nn.Flatten(),
-            nn.Linear(64*64*64, latent_dim),
+            nn.Linear(256*32*32, latent_dim)
         )
-
         self.decoder = nn.Sequential(
-            nn.Linear(latent_dim, 64*64*64),
-            nn.ReLU(),
-            nn.Unflatten(1, (64,64,64)),
-            nn.ConvTranspose2d(64, 32, 3, stride=2, padding=1, output_padding=1),
-            nn.ReLU(),
-            nn.ConvTranspose2d(32, 3, 3, stride=2, padding=1, output_padding=1),
-            nn.Sigmoid() 
+            nn.Linear(latent_dim, 256*32*32), nn.ReLU(),
+            nn.Unflatten(1, (256, 32, 32)),
+            nn.ConvTranspose2d(256, 128, 4, stride=2, padding=1), nn.ReLU(),
+            nn.ConvTranspose2d(128, 64, 4, stride=2, padding=1), nn.ReLU(),
+            nn.ConvTranspose2d(64, 3, 4, stride=2, padding=1), nn.Sigmoid()
         )
 
     def forward(self, x):
         z = self.encoder(x)
-        x_hat = self.decoder(z)
-        return x_hat
+        return self.decoder(z)
+
 
     def get_embedding(self, x):
         return self.encoder(x)
-    
+
 ############### 
 
 
@@ -72,13 +66,13 @@ print(dataset.__len__())
 dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
 
-model = Autoencoder(latent_dim=64)
+model = AE(latent_dim=256)
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 
 
-n_epochs = 3
+n_epochs = 1
 for epoch in range(n_epochs):
     model.train()
     epoch_loss = 0
@@ -91,3 +85,33 @@ for epoch in range(n_epochs):
         optimizer.step()
         epoch_loss += loss.item() * data.size(0)
     print(f"Epoch {epoch+1}, Loss: {epoch_loss / len(dataloader.dataset):.6f}")
+
+
+
+##### Test
+
+data_iter = iter(dataloader)
+images, _ = next(data_iter)
+images = images.to(device)
+
+model.eval()
+with torch.no_grad():
+    reconstructions = model(images)
+
+def imshow(img_tensor):
+    img = img_tensor.detach().cpu().numpy().transpose(1, 2, 0)
+    img = np.clip(img * 255, 0, 255).astype(np.uint8)
+    return img
+
+
+n = 5
+plt.figure(figsize=(12, 4))
+for i in range(n):
+    plt.subplot(2, n, i+1)
+    plt.imshow(imshow(images[i]))
+    plt.axis('off')
+    plt.subplot(2, n, n+i+1)
+    plt.imshow(imshow(reconstructions[i]))
+    plt.axis('off')
+plt.tight_layout()
+plt.show()
