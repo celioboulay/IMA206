@@ -56,9 +56,7 @@ transform_resize_256 = transforms.Compose([
 transform_center_256 = transforms.Compose([
     transforms.CenterCrop(256),
     transforms.RandomHorizontalFlip(),
-    #transforms.RandomRotation(20),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5]*3, std=[0.5]*3)
 ])
 
 transform_high_gradient = transforms.Compose([

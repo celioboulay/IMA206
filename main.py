@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from utils.data_loader import *
+from Models.sequentials import AE
 from utils.transformations_init import *
 
 
@@ -30,15 +31,16 @@ Data/dossier/
         ....
 '''
 dataset = datasets.ImageFolder('Data/smalldata1/', transform=transform_center_256)
-dataloader = DataLoader(dataset, batch_size=32, shuffle=True) 
+dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
 
 
 ####### Collecting input features with a pre trained network
-from Models.SAE import SAE
+## Ca va se resumer a import SAE puis charger les poids du SAE pre entraine
 
-f_theta = SAE(NotImplemented)
-f_theta.to(device)
+f_theta = AE(latent_dim=128)
+f_theta.load_state_dict(torch.load("Models/autoencoder.pth", map_location=device))
+f_theta = f_theta.to(device)
 f_theta.eval()
 
 
