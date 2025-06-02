@@ -22,7 +22,7 @@ from scipy.spatial.distance import cdist
 
 
 class TMM(object):
-  
+
     def __init__(self, n_clusters=1, alpha=1):
         self.n_clusters = n_clusters
         self.tol = 1e-3
@@ -64,5 +64,11 @@ class TMM(object):
         return 0
     
     def compute_distributions():
+        return 0
+    
+    def inner_cluster_regularization():
+
+
+
         return 0
     
