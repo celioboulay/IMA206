@@ -104,7 +104,7 @@ def imshow(img_tensor):
     return img
 
 
-n = 5
+n = 6
 plt.figure(figsize=(12, 4))
 for i in range(n):
     plt.subplot(2, n, i+1)
