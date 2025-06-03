@@ -32,7 +32,7 @@ Data/dossier/
         im1
         ....
 '''
-dataset = datasets.ImageFolder('Data/smalldata1/', transform=transform_center_256)
+dataset = datasets.ImageFolder('Data/smalldata1/', transform=transform_local_center)
 dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 print('data loaded')
 
@@ -41,7 +41,7 @@ print('data loaded')
 ####### Collecting input features with a pre trained network
 ## Ca va se resumer a import SAE puis charger les poids du SAE pre entraine et passer les donnees a travers
 
-f_theta = AE(latent_dim=128) # meme latent_dim que le modele ci dessous
+f_theta = AE(latent_dim=256) # meme latent_dim que le modele ci dessous
 f_theta.load_state_dict(torch.load("Models/autoencoder.pth", map_location=device))
 f_theta = f_theta.to(device)
 f_theta.eval()
@@ -62,7 +62,7 @@ print(features_tensor.shape) # features_tensor embedded data_points, maintenant 
 ############### Clusters initialization with K-means
 from sklearn.cluster import KMeans
 
-n_clusters_init = 30
+n_clusters_init = 10
 
 kmeans = KMeans(n_clusters=n_clusters_init, random_state=0).fit(features_tensor.numpy())
 cluster_centers_init = kmeans.cluster_centers_
@@ -75,8 +75,8 @@ from dec.dec import TMM
 tmm = TMM(n_clusters=n_clusters_init)
 cluster_centers = cluster_centers_init
 
-nb_epochs=5
-learning_rate = 1e-4
+nb_epochs=0
+learning_rate = 1e-5
 
 optimizer = torch.optim.Adam(f_theta.parameters(), lr=learning_rate)
 cluster_centers_torch = torch.tensor(cluster_centers_init, device=device, dtype=torch.float)

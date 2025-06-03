@@ -42,7 +42,7 @@ class CNN_2(nn.Module):
 
 
 
-class Autoencoder(nn.Module):
+class Autoencoder(nn.Module):   # for mnist
     def __init__(self, latent_dim=64):
         super().__init__()
 
@@ -93,6 +93,36 @@ class AE(nn.Module):
             nn.ConvTranspose2d(256, 128, 4, stride=2, padding=1), nn.ReLU(),
             nn.ConvTranspose2d(128, 64, 4, stride=2, padding=1), nn.ReLU(),
             nn.ConvTranspose2d(64, 3, 4, stride=2, padding=1), nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        z = self.encoder(x)
+        return self.decoder(z)
+
+
+    def get_embedding(self, x):
+        return self.encoder(x)
+    
+
+##### Test pour une bonne architecture #Aled
+
+class AE_local_64_patch(nn.Module):
+    def __init__(self, latent_dim=128):
+        super().__init__()
+        final_size = 8
+        self.encoder = nn.Sequential(
+            nn.Conv2d(3, 64, 3, stride=2, padding=1), nn.ReLU(),
+            nn.Conv2d(64, 128, 3, stride=2, padding=1), nn.ReLU(),
+            nn.Conv2d(128, 256, 3, stride=2, padding=1), nn.ReLU(),
+            nn.Flatten(),
+            nn.Linear(256*final_size*final_size, latent_dim)   # taille image / 2^3
+        )
+        self.decoder = nn.Sequential(
+            nn.Linear(latent_dim, 256*final_size*final_size), nn.ReLU(),
+            nn.Unflatten(1, (256, final_size, final_size)),
+            nn.ConvTranspose2d(256, 128, 3, stride=2, padding=1, output_padding=1), nn.ReLU(),
+            nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1, output_padding=1), nn.ReLU(),
+            nn.ConvTranspose2d(64, 3, 3, stride=2, padding=1, output_padding=1), nn.Sigmoid()
         )
 
     def forward(self, x):

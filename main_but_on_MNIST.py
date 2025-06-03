@@ -8,7 +8,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-from utils.data_loader import *
 from utils.transformations_init import *
 
 import torch

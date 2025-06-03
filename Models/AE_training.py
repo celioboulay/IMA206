@@ -16,22 +16,23 @@ from torchvision import datasets, transforms
 
 from tqdm import tqdm
 
-from utils.transformations_init import transform_center_256
-from Models.sequentials import AE
+from utils.transformations_init import *
+from Models.sequentials import AE, AE_local_64_patch
 
 'https://stackoverflow.com/questions/51253611/how-to-get-an-autoencoder-to-work-on-a-small-image-dataset'
+'https://madebyollin.github.io/convnet-calculator/'
 
 ######## Cuda
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
-dataset = datasets.ImageFolder('Data/smalldata1/', transform=transform_center_256)
+dataset = datasets.ImageFolder('Data/smalldata1/', transform=transform_local_center) #transform_center_256)
 print(dataset.__len__())
-dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
 
 
 ####### Loading AutoEncoder
-model = AE(latent_dim=128)
+model = AE(latent_dim=256)
 model.to(device)
 
 
@@ -39,7 +40,7 @@ model.to(device)
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
-n_epochs = 100  
+n_epochs = 60
 for epoch in range(n_epochs):
     model.train()
     epoch_loss = 0
