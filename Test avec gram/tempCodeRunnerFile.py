@@ -1,0 +1,2 @@
+
+    feats = model(images)

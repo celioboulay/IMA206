@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import matplotlib.cm as cm
+import seaborn as sns
 import umap.umap_ as umap
 
 
@@ -66,3 +67,15 @@ def plot_umap(z_3d, painters, epoch, limits):
     plt.tight_layout()
     plt.savefig(f"output/umap_epoch_{epoch}.png")
     plt.close()
+
+
+
+
+
+def confusion_print(m):
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(m, annot=True, fmt='d', cmap='viridis')
+    plt.xlabel('predicted')
+    plt.ylabel('true')
+    plt.title(str(m))
+    plt.show()

@@ -72,3 +72,21 @@ class Autoencoder(nn.Module):
 
     def get_embedding(self, x):
         return self.encoder(x)
+    
+
+
+
+class VGGFeatures(nn.Module):
+    def __init__(self, layers):
+        super().__init__()
+        self.vgg = models.vgg16(pretrained=True).features
+        self.layers = layers
+        self.selected = [int(k) for k in layers]
+
+    def forward(self, x):
+        features = []
+        for i, layer in enumerate(self.vgg):
+            x = layer(x)
+            if i in self.selected:
+                features.append(x)
+        return features
