@@ -26,21 +26,21 @@ from Models.sequentials import AE, AE_local_64_patch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
-dataset = datasets.ImageFolder('Data/smalldata1/', transform=transform_local_center) #transform_center_256)
+dataset = datasets.ImageFolder('Data/smalldata/', transform=transform_local_center) #transform_center_256)
 print(dataset.__len__())
 dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
 
 
 ####### Loading AutoEncoder
-model = AE(latent_dim=256)
+model = AE(latent_dim=100)
 model.to(device)
 
 
 ####### Training AE
 criterion = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=1e-3)
+optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
-n_epochs = 60
+n_epochs = 70
 for epoch in range(n_epochs):
     model.train()
     epoch_loss = 0

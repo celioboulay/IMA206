@@ -16,31 +16,25 @@ class SelectStrongestGradientPatch:
         gray = transforms.functional.to_grayscale(img, num_output_channels=1)
         tensor = transforms.functional.to_tensor(gray).unsqueeze(0)
 
-        sobel_x = torch.tensor([[[-1, 0, 1],
-                                 [-2, 0, 2],
-                                 [-1, 0, 1]]], dtype=torch.float32).unsqueeze(0)
-        sobel_y = torch.tensor([[[-1, -2, -1],
-                                 [ 0,  0,  0],
-                                 [ 1,  2,  1]]], dtype=torch.float32).unsqueeze(0)
-        
-        grad_x = F.conv2d(tensor, sobel_x, padding=1)
-        grad_y = F.conv2d(tensor, sobel_y, padding=1)
+        sobel_x = torch.tensor([[[-1,0,1],[-2,0,2],[-1,0,1]]], dtype=torch.float32).unsqueeze(0)
+        sobel_y = torch.tensor([[[-1,-2,-1],[0,0,0],[1,2,1]]], dtype=torch.float32).unsqueeze(0)
 
-        grad = torch.sqrt(grad_x**2 + grad_y**2)
+        grad = torch.sqrt(F.conv2d(tensor, sobel_x, padding=1)**2 + F.conv2d(tensor, sobel_y, padding=1)**2)
 
         _, _, H, W = grad.shape
-        stride = self.patch_size // 4  # overlap
-        kernel_size = self.patch_size
+        crop_h, crop_w = min(self.patch_size, H), min(self.patch_size, W)
 
-        grad_sums = F.avg_pool2d(grad, kernel_size=kernel_size, stride=stride, padding=0) * (kernel_size**2)
+        if H < self.patch_size or W < self.patch_size:
+            top, left = 0, 0
+        else:
+            stride = self.patch_size // 4
+            grad_sums = F.avg_pool2d(grad, kernel_size=self.patch_size, stride=stride) * (self.patch_size**2)
+            idx = torch.argmax(grad_sums)
+            idx_h = (idx // grad_sums.shape[-1]) * stride
+            idx_w = (idx % grad_sums.shape[-1]) * stride
+            top, left = idx_h.item(), idx_w.item()
 
-        idx = torch.argmax(grad_sums)   # pooling pour trouver le max
-        idx_h = (idx // grad_sums.shape[-1]) * stride
-        idx_w = (idx % grad_sums.shape[-1]) * stride
-
-        patch = transforms.functional.crop(img, top=idx_h.item(), left=idx_w.item(), height=self.patch_size, width=self.patch_size)
-
-        return patch
+        return transforms.functional.crop(img, top=top, left=left, height=crop_h, width=crop_w)
 
 
 
@@ -62,7 +56,7 @@ transform_center_256 = transforms.Compose([
 
 
 transform_local_center = transforms.Compose([
-    SelectStrongestGradientPatch(patch_size=64),
+    SelectStrongestGradientPatch(patch_size=512),
     transforms.Resize((256, 256)),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
@@ -71,10 +65,22 @@ transform_local_center = transforms.Compose([
 transform_high_gradient = transforms.Compose([
     transforms.RandomHorizontalFlip(),
     #transforms.RandomRotation(20),
-    SelectStrongestGradientPatch(patch_size=256),   # on choisi le patch avec le gradient maximal (eq point d'interet)
+    SelectStrongestGradientPatch(patch_size=1000),
+    transforms.Resize((256, 256)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5]*3, std=[0.5]*3)
+    transforms.Normalize(mean=[0.5]*3, std=[0.5]*3),
 ])
 
 
 transform_trop_bien = None    # aled
+
+
+
+simclr_transform = transforms.Compose([  # randomized
+    SelectStrongestGradientPatch(patch_size=256),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomApply([transforms.ColorJitter(0.8, 0.8, 0.8, 0.2)], p=0.8),
+    transforms.RandomGrayscale(p=0.2),
+    transforms.GaussianBlur(3),
+    transforms.ToTensor(),
+])

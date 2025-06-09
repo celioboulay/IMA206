@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.models as models
-
+from torchvision.models import resnet18
 
 class CNN_2(nn.Module):
     def __init__(self, nb_channels, nb_classes):
@@ -132,3 +132,44 @@ class AE_local_64_patch(nn.Module):
 
     def get_embedding(self, x):
         return self.encoder(x)
+    
+
+
+
+
+
+
+
+
+##### pour simCLR
+
+
+class ProjectionHead(nn.Module):
+    def __init__(self, input_dim=512, projection_dim=128):
+        super().__init__()
+        self.fc1 = nn.Linear(input_dim, 512)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(512, projection_dim)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        return x
+
+
+
+class SimCLR(nn.Module):
+    def __init__(self, projection_dim=128):
+        super().__init__()
+        base_encoder = resnet18(weights=None)
+        num_features = base_encoder.fc.in_features
+        base_encoder.fc = nn.Identity()  # remove classification head
+
+        self.encoder = base_encoder
+        self.projector = ProjectionHead(input_dim=num_features, projection_dim=projection_dim)
+
+    def forward(self, x):
+        h = self.encoder(x)
+        z = self.projector(h)
+        return h, z
