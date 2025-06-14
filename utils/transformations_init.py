@@ -72,8 +72,6 @@ transform_high_gradient = transforms.Compose([
 ])
 
 
-transform_trop_bien = None    # aled
-
 
 
 simclr_transform = transforms.Compose([  # randomized
