@@ -11,6 +11,6 @@ def merge(embeddings_dir):
     #boucle dec
 
 
-
-
+    #tant que pas implemente on utilisera
+    #embeddings = concatenate(z1, z2)
     #return embeddings

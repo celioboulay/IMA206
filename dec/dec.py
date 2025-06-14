@@ -5,19 +5,16 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.insert(0, parent_dir)
 
-
-import cv2
 import numpy as np
-import shutil
-import random
-from xml.dom import minidom
 import matplotlib.pyplot as plt 
 from scipy.optimize import linear_sum_assignment
 import torch
 
 from scipy.spatial.distance import cdist
 
-
+'''
+j'ai pas touche a cette partie depuis 2semaines mais tranquille normalement ca demandera pas trop de travail supplementaire
+'''
 
 class TMM(object):
 
