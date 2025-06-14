@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 import features
-import features.compute_global
 import utils
 from clustering import cluster
 
@@ -43,12 +42,12 @@ def main():    # python main.py --data_path ./Data/ --embedding_dir ./embeddings
 
     if args.recompute_embeddings:
 
-        local_embeddings = features.compute_global.compute(args.data_path, args.embedding_dir)  # f_theta_1   # compute local effectue aussi simCLR
-        global_embeddings = features.compute_local.compute(args.data_path, args.embedding_dir)  # f_theta_2
+        features.compute_global.compute(args.data_path, args.embedding_dir)  # f_theta_1   # compute local effectue aussi simCLR
+        features.compute_local.compute(args.data_path, args.embedding_dir)  # f_theta_2
 
     
-    embeddings = utils.merge_embeddings(local_embeddings, global_embeddings) # f_alpha
-    clusters = cluster(embeddings, method='dec')    # dec agit sur f_alpha
+    utils.merge_embeddings(args.embedding_dir) # f_alpha
+    clusters = cluster(args.embedding_dir, method='dec')    # dec agit sur f_alpha
 
     utils.visualize(clusters)
 
