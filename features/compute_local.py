@@ -1,2 +1,2 @@
-def compute(data):
+def compute(data_path, embedding_dir) :
     pass
