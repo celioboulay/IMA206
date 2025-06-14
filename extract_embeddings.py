@@ -1,0 +1,2 @@
+def compute(data):
+    pass
