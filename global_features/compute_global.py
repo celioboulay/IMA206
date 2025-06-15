@@ -15,6 +15,11 @@ from utils.transformations_init import *
 from init_global import init
 from simCLR_like import global_SSL
 
+def load_model(device, model_path):
+    model = timm.create_model('vit_large_patch16_224', pretrained=False)  
+    model.load_state_dict(torch.load(model_path, map_location=device))
+    model.to(device)
+    return model
 
 
 def process_features(features_tensor):  # pour ramener les features extraites a la forme choisie, a savoir un .pt pour le moment
