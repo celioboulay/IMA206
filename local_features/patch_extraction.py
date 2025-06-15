@@ -269,7 +269,7 @@ def extract_patches_array(image: np.ndarray,
 # Exemple d'utilisation
 if __name__ == "__main__":
     # Chargement d'une image d'exemple
-    image = cv2.imread('C:/Users/Myria/OneDrive - telecom-paristech.fr/Documents/2A/IMA206/Projet/IMA206/Data/reduced dataset/delacroix - eugene-delacroix_1798/delacroix_8.jpg')
+    image = cv2.imread('C:/Users/Myria/OneDrive - telecom-paristech.fr/Documents/2A/IMA206/Projet/IMA206/Data/reduced dataset/delacroix - eugene-delacroix_1798/delacroix_2.jpg')
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     patch_s = 32
