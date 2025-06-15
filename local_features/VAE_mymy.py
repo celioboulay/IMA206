@@ -13,7 +13,7 @@ from typing import Tuple, List, Optional
 class VAE(nn.Module):
     
     def __init__(self, input_channels=3, latent_dim=128):
-        super(ArtPatchVAE, self).__init__()
+        super(VAE, self).__init__()
         
         self.latent_dim = latent_dim
         
