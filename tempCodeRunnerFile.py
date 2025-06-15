@@ -1,0 +1,1 @@
+ython main.py --data_path ./Data/ --embedding_dir ./embeddings --verbose

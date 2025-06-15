@@ -12,34 +12,29 @@ from torchvision import datasets, models
 from torch.utils.data import DataLoader, Dataset
 
 from utils.transformations_init import *
-from init_global import init
-from simCLR_like import global_SSL
+from global_features.get_embeddings  import *
+from global_features.simCLR_like import global_SSL
 
-def load_model(device, model_path):
+
+'''def load_model(device, model_path):
     model = timm.create_model('vit_large_patch16_224', pretrained=False)  
     model.load_state_dict(torch.load(model_path, map_location=device))
     model.to(device)
-    return model
+    return model'''
 
 
-def process_features(features_tensor):  # pour ramener les features extraites a la forme choisie, a savoir un .pt pour le moment
-    embeddings=features_tensor
-    print(embeddings.shape())
-    return embeddings
-
-
-def compute(data_path, device, embedding_dir=current_dir):
+def compute(data_path, embedding_dir, device):
 
     dataset = datasets.ImageFolder(data_path, transform=transform_local_center)
     dataloader = DataLoader(dataset, batch_size=32, shuffle=False)
 
     f_theta_2 = timm.create_model('vit_large_patch16_224', pretrained=True) # modele temporaire pour simplifier le squelette
-    # f_theta_2 = load_model(device, model)
+    # f_theta_2 = load_model
     f_theta_2.to(device)
     f_theta_2.eval()
 
     # global SLL args a passer dans compute
-    f_theta_2 = global_SSL(data_path, device, f_theta_2, n_epochs=20, batch_size=32, lr=1e-3, weight_decay=1e-6, temperature=0.5)  # data_path parce quon va charger un dataset different
-    features_tensor = init(dataloader, device, model=f_theta_2)
+    f_theta_2 = global_SSL(data_path, device, f_theta_2, n_epochs=1, batch_size=8, lr=1e-3, weight_decay=1e-6, temperature=0.5)  # data_path parce quon va charger un dataset different
+    features_tensor = get_embeddings(dataloader, device, model=f_theta_2)
     embeddings = process_features(features_tensor)
     torch.save(embeddings, embedding_dir+"/global_embeddings.pt")

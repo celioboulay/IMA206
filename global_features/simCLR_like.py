@@ -29,7 +29,7 @@ def global_SSL(data_path, device, f_theta, n_epochs=10, batch_size=32, lr=1e-3, 
         for x1, x2 in tqdm(dataloader, desc=f"epoch [{epoch}/{n_epochs}]"):
 
             x1, x2 = x1.to(device), x2.to(device)
-            _, z1, _, z2 = f_theta(x1), f_theta(x2)
+            z1, z2 = f_theta(x1), f_theta(x2)
 
             loss = nt_xent_loss.nt_xent_loss(z1, z2, temperature=temperature)
 

@@ -56,7 +56,7 @@ transform_center_256 = transforms.Compose([
 
 transform_local_center = transforms.Compose([
     SelectStrongestGradientPatch(patch_size=512),
-    transforms.Resize((256, 256)),
+    transforms.Resize((224, 224)),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
 ])
