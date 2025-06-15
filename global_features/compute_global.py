@@ -39,7 +39,7 @@ def compute(data_path, embedding_dir, device):
     f_theta_2.eval()
 
     features_tensor = init(dataloader, device, model=f_theta_2)
-    global_SSL(data_path, features_tensor, device, n_epochs=25, f_theta=f_theta_2)  # data_path parce quon va charger un dataset different
+    f_theta_2 = global_SSL(data_path, device, f_theta_2, n_epochs=20, batch_size=32, lr=1e-3, weight_decay=1e-6, temperature=0.5)  # data_path parce quon va charger un dataset different
     features_tensor = compute_features(dataset, f_theta_2, device)
     embeddings = process_features(features_tensor)
     torch.save(embeddings, embedding_dir+"/global_embeddings.pt")
