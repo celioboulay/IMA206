@@ -25,3 +25,8 @@ class AE(nn.Module):
 
     def get_embedding(self, x):
         return self.encoder(x)
+    
+
+class Merge_NN(nn.Module):
+    def __init__(self, latent_dim=128):
+        super().__init__()
