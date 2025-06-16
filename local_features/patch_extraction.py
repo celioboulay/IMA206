@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from typing import List, Tuple, Optional
+import os
 import matplotlib.pyplot as plt
 
 def compute_gradient_scores(image: np.ndarray, 
@@ -264,43 +265,62 @@ def extract_patches_array(image: np.ndarray,
         patches.append(patch)
     
     return np.array(patches)
-# Exemple d'utilisation
+
+def save_patches(image, patch_size, stride, save_dir, base_name):
+    h, w, _ = image.shape
+    patch_id = 0
+    for y in range(0, h - patch_size + 1, stride):
+        for x in range(0, w - patch_size + 1, stride):
+            patch = image[y:y+patch_size, x:x+patch_size]
+            patch_filename = f"{base_name}_patch_{patch_id}.jpg"
+            patch_path = os.path.join(save_dir, patch_filename)
+            cv2.imwrite(patch_path, cv2.cvtColor(patch, cv2.COLOR_RGB2BGR))
+            patch_id += 1
+
 if __name__ == "__main__":
-    # Chargement d'une image d'exemple
-    image = cv2.imread('C:/Users/Myria/OneDrive - telecom-paristech.fr/Documents/2A/IMA206/Projet/IMA206/Data/reduced dataset/delacroix - eugene-delacroix_1798/delacroix_2.jpg')
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    patch_size = 64
+    stride = patch_size // 2
 
-    patch_s = 32
-    
-    print("=== Méthode 1: Gradient sur luminance ===")
-    patch_scores_lum = compute_gradient_scores(image, patch_size=patch_s, stride=32, 
-                                              method='sobel', color_mode='luminance')
-    print(f"Nombre de patchs: {len(patch_scores_lum)}")
-    
-    print("\n=== Méthode 2: Gradient par canal ===")
-    patch_scores_channels = compute_gradient_scores(image, patch_size=patch_s, stride=32, 
-                                                   method='sobel', color_mode='per_channel')
-    print(f"Nombre de patchs: {len(patch_scores_channels)}")
+    data_dir = "Data"
+    output_dir = "data_patch"
+    os.makedirs(output_dir, exist_ok=True)
 
-    print("\n=== Méthode 3: Gradient + variance de couleur ===")
-    patch_scores_color = compute_color_gradient_scores(image, patch_size=patch_s, stride=32,
-                                                      include_color_variance=True,
-                                                      gradient_weight=0.6, color_weight=0.4)
-    print(f"Nombre de patchs: {len(patch_scores_color)}")
+    image_extensions = (".jpg", ".jpeg", ".png")
 
-    # Comparaison des top patchs
-    print("\nTop 5 patchs (luminance):")
-    for i, (x, y, score) in enumerate(get_top_patches(patch_scores_lum, 5)):
-        print(f"  Patch {i+1}: ({x}, {y}), score: {score:.4f}")
-    
-    print("\nTop 5 patchs (gradient + couleur):")
-    for i, (x, y, score) in enumerate(get_top_patches(patch_scores_color, 5)):
-        print(f"  Patch {i+1}: ({x}, {y}), score: {score:.4f}")
-    
-    # Extraction des patchs COULEUR pour la VAE
-    color_patches = extract_patches_array(image, patch_scores_color, patch_size=patch_s, top_k=20)
-    print(f"\nPatchs couleur extraits pour VAE: {color_patches.shape}")
-    print(f"Type de données: {color_patches.dtype}")
-    
-    # Visualisation (conserve les couleurs)
-    visualize_patches(image, patch_scores_color, patch_size=patch_s, top_k=10)
+    for root, dirs, files in os.walk(data_dir):
+        for file in files:
+            if file.lower().endswith(image_extensions):
+                image_path = os.path.join(root, file)
+                print(f"Found image: {image_path}")
+
+                image = cv2.imread(image_path)
+                if image is None:
+                    print(f"Could not read image: {image_path}")
+                    continue
+
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+                # Subfolder for each image's top patches
+                base_name = os.path.splitext(os.path.basename(file))[0]
+                subfolder = os.path.join(output_dir, base_name)
+                os.makedirs(subfolder, exist_ok=True)
+
+                # 1. Compute scores
+                patch_scores = compute_gradient_scores(image, patch_size=patch_size, stride=stride)
+
+                # 2. Keep top 30%
+                n_top = int(len(patch_scores) * 0.66)
+                top_patches = get_top_patches(patch_scores, top_k=n_top)
+
+                # 3. Extract patches
+                selected_patches = extract_patches_array(image, top_patches, patch_size)
+
+                # 4. Save patches
+                for i, patch in enumerate(selected_patches):
+                    patch_filename = f"{base_name}_top_{i}.jpg"
+                    patch_path = os.path.join(subfolder, patch_filename)
+                    cv2.imwrite(patch_path, cv2.cvtColor(patch, cv2.COLOR_RGB2BGR))
+
+                
+
+
