@@ -22,6 +22,36 @@ from global_features.simCLR_like import global_SSL
     model.to(device)
     return model'''
 
+from torchvision.models.feature_extraction import create_feature_extractor
+
+def load_model(device, model_name):
+    try:
+        model = timm.create_model(model_name, pretrained=True)
+        if hasattr(model, 'forward_features'):
+            model.get_embedding = model.forward_features
+        else:
+            model.get_embedding = lambda x: model.forward(x)
+    
+    except Exception:
+        if model_name == 'resnet50':
+            base_model = models.resnet50(pretrained=True)
+            return_nodes = {'avgpool': 'features'}
+            extractor = create_feature_extractor(base_model, return_nodes=return_nodes)
+            extractor.get_embedding = lambda x: extractor(x)['features'].squeeze(-1).squeeze(-1)
+            model = extractor
+
+        # elif model_name == 'custom_vit':
+        #     from my_models import CustomViT
+        #     model = CustomViT()
+        #     model.load_pretrained_weights()  
+        #     model.get_embedding = model.forward
+
+        else:
+            raise ValueError(f"Modèle {model_name} non reconnu.")
+
+    return model
+
+
 
 def compute(data_path, embedding_dir, device):
 
