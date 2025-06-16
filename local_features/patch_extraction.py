@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 from typing import List, Tuple, Optional
-from scipy import ndimage
 import matplotlib.pyplot as plt
 
 def compute_gradient_scores(image: np.ndarray, 
@@ -265,7 +264,6 @@ def extract_patches_array(image: np.ndarray,
         patches.append(patch)
     
     return np.array(patches)
-
 # Exemple d'utilisation
 if __name__ == "__main__":
     # Chargement d'une image d'exemple
