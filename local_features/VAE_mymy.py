@@ -88,4 +88,13 @@ class VAE(nn.Module):
         recon_x = self.decode(z)
         return recon_x, mu, logvar
 
+def vae_loss(recon_x, x, mu, logvar, beta=1.0):
+
+    # Perte de reconstruction (MSE)
+    recon_loss = F.mse_loss(recon_x, x, reduction='sum')
+    
+    # Divergence KL
+    kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+    
+    return recon_loss + beta * kl_loss, recon_loss, kl_loss
     
