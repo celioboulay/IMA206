@@ -329,6 +329,9 @@ def get_contour(image,kl=1):
 if __name__ == "__main__":
     patch_size = 32
     stride = patch_size // 2
+    nb_patches = 5
+    sigma1 = 1.0
+    sigma2 = 2.0
 
     data_dir = "Data"
     output_dir = "data_contour_patch"
@@ -362,7 +365,9 @@ if __name__ == "__main__":
                 top_patches = get_top_patches(patch_scores, top_k=n_top)
 
                 # 3. Extract patches
-                selected_patches = extract_patches_array_with_dog(get_contour(image), top_patches, patch_size)
+                selected_patches = extract_patches_array_with_dog(get_contour(image), top_patches, 
+                                                                  patch_size, top_k=nb_patches, apply_dog_to_patches=True,
+                                                                  dog_sigma1= sigma1, dog_sigma2=sigma2)
 
                 # 4. Save patches
                 for i, patch in enumerate(selected_patches):
