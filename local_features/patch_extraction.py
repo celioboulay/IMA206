@@ -365,7 +365,7 @@ if __name__ == "__main__":
                 top_patches = get_top_patches(patch_scores, top_k=n_top)
 
                 # 3. Extract patches
-                selected_patches = extract_patches_array_with_dog(get_contour(image), top_patches, 
+                selected_patches = extract_patches_array_with_dog(image, top_patches, 
                                                                   patch_size, top_k=nb_patches, apply_dog_to_patches=True,
                                                                   dog_sigma1= sigma1, dog_sigma2=sigma2)
 
