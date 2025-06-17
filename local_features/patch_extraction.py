@@ -4,6 +4,46 @@ from typing import List, Tuple, Optional
 import os
 import matplotlib.pyplot as plt
 
+def apply_dog_filter(image: np.ndarray, 
+                     sigma1: float = 1.0, 
+                     sigma2: float = 2.0,
+                     normalize: bool = True) -> np.ndarray:
+    """
+    Applique un filtre DoG (Difference of Gaussians) pour extraire les contours.
+    
+    Args:
+        image: Image d'entrée (H, W) ou (H, W, C)
+        sigma1: Écart-type du premier filtre gaussien (plus petit)
+        sigma2: Écart-type du second filtre gaussien (plus grand)
+        normalize: Si True, normalise le résultat entre 0 et 255
+    
+    Returns:
+        Image filtrée avec les contours mis en évidence
+    """
+    
+    # Conversion en niveaux de gris si nécessaire
+    if len(image.shape) == 3:
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    else:
+        gray = image.copy()
+    
+    # Conversion en float pour éviter les problèmes de débordement
+    gray = gray.astype(np.float32)
+    
+    # Application des deux filtres gaussiens
+    gaussian1 = cv2.GaussianBlur(gray, (0, 0), sigma1)
+    gaussian2 = cv2.GaussianBlur(gray, (0, 0), sigma2)
+    
+    # Différence des gaussiennes
+    dog = gaussian1 - gaussian2
+    
+    if normalize:
+        # Normalisation pour avoir des valeurs entre 0 et 255
+        dog = np.abs(dog)  # Valeur absolue pour avoir des contours positifs
+        dog = ((dog - dog.min()) / (dog.max() - dog.min()) * 255).astype(np.uint8)
+    
+    return dog
+
 def compute_gradient_scores(image: np.ndarray, 
                           patch_size: int = 64, 
                           stride: Optional[int] = None,
@@ -234,21 +274,29 @@ def visualize_patches(image: np.ndarray,
     plt.tight_layout()
     plt.show()
 
-def extract_patches_array(image: np.ndarray, 
-                         patch_scores: List[Tuple[int, int, float]], 
-                         patch_size: int = 64,
-                         top_k: Optional[int] = None) -> np.ndarray:
+
+def extract_patches_array_with_dog(image: np.ndarray, 
+                                  patch_scores: List[Tuple[int, int, float]], 
+                                  patch_size: int = 64,
+                                  top_k: Optional[int] = None,
+                                  apply_dog_to_patches: bool = True,
+                                  dog_sigma1: float = 1.0,
+                                  dog_sigma2: float = 2.0) -> np.ndarray:
     """
-    Extrait les patchs de l'image sous forme de tableau numpy.
+    Extrait les patchs de l'image et applique optionnellement DoG à chaque patch.
     
     Args:
         image: Image originale
         patch_scores: Liste des scores de patchs
         patch_size: Taille des patchs
         top_k: Nombre de patchs à extraire (tous si None)
+        apply_dog_to_patches: Si True, applique DoG à chaque patch extrait
+        dog_sigma1: Premier sigma pour DoG
+        dog_sigma2: Second sigma pour DoG
     
     Returns:
-        Array numpy de shape (n_patches, patch_size, patch_size, channels)
+        Array numpy de shape (n_patches, patch_size, patch_size) si DoG appliqué
+        ou (n_patches, patch_size, patch_size, channels) sinon
     """
     
     if top_k is not None:
@@ -262,7 +310,13 @@ def extract_patches_array(image: np.ndarray,
             patch = image[y:y+patch_size, x:x+patch_size, :]
         else:
             patch = image[y:y+patch_size, x:x+patch_size]
-        patches.append(patch)
+        
+        # Application du DoG au patch si demandé
+        if apply_dog_to_patches:
+            patch_dog = apply_dog_filter(patch, dog_sigma1, dog_sigma2)
+            patches.append(patch_dog)
+        else:
+            patches.append(patch)
     
     return np.array(patches)
 
@@ -273,7 +327,7 @@ def get_contour(image,kl=1):
     return gradient
 
 if __name__ == "__main__":
-    patch_size = 64
+    patch_size = 32
     stride = patch_size // 2
 
     data_dir = "Data"
@@ -308,7 +362,7 @@ if __name__ == "__main__":
                 top_patches = get_top_patches(patch_scores, top_k=n_top)
 
                 # 3. Extract patches
-                selected_patches = extract_patches_array(get_contour(image), top_patches, patch_size)
+                selected_patches = extract_patches_array_with_dog(get_contour(image), top_patches, patch_size)
 
                 # 4. Save patches
                 for i, patch in enumerate(selected_patches):
@@ -316,5 +370,5 @@ if __name__ == "__main__":
                     patch_path = os.path.join(subfolder, patch_filename)
                     cv2.imwrite(patch_path, cv2.cvtColor(patch, cv2.COLOR_RGB2BGR))
 
-                
+                visualize_patches(image, patch_scores, patch_size=patch_size, top_k=10)
 
