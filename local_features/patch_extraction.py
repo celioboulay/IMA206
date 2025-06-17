@@ -266,23 +266,18 @@ def extract_patches_array(image: np.ndarray,
     
     return np.array(patches)
 
-def save_patches(image, patch_size, stride, save_dir, base_name):
-    h, w, _ = image.shape
-    patch_id = 0
-    for y in range(0, h - patch_size + 1, stride):
-        for x in range(0, w - patch_size + 1, stride):
-            patch = image[y:y+patch_size, x:x+patch_size]
-            patch_filename = f"{base_name}_patch_{patch_id}.jpg"
-            patch_path = os.path.join(save_dir, patch_filename)
-            cv2.imwrite(patch_path, cv2.cvtColor(patch, cv2.COLOR_RGB2BGR))
-            patch_id += 1
+def get_contour(image,kl=1):
+    kernel_size = 2*kl+1
+    blurred = cv2.GaussianBlur(image, (kernel_size, kernel_size), 100)
+    gradient = _compute_single_channel_gradient(blurred, 'sobel')
+    return gradient
 
 if __name__ == "__main__":
     patch_size = 64
     stride = patch_size // 2
 
     data_dir = "Data"
-    output_dir = "data_patch"
+    output_dir = "data_contour_patch"
     os.makedirs(output_dir, exist_ok=True)
 
     image_extensions = (".jpg", ".jpeg", ".png")
@@ -313,7 +308,7 @@ if __name__ == "__main__":
                 top_patches = get_top_patches(patch_scores, top_k=n_top)
 
                 # 3. Extract patches
-                selected_patches = extract_patches_array(image, top_patches, patch_size)
+                selected_patches = extract_patches_array(get_contour(image), top_patches, patch_size)
 
                 # 4. Save patches
                 for i, patch in enumerate(selected_patches):
@@ -322,5 +317,4 @@ if __name__ == "__main__":
                     cv2.imwrite(patch_path, cv2.cvtColor(patch, cv2.COLOR_RGB2BGR))
 
                 
-
 
