@@ -215,55 +215,62 @@ def get_top_patches(patch_scores: List[Tuple[int, int, float]],
     return sorted(patch_scores, key=lambda x: x[2], reverse=True)[:top_k]
 
 def visualize_patches(image: np.ndarray, 
-                      selected_patches: List[Tuple[int, int, float]],
+                      patch_scores: List[Tuple[int, int, float]],
                       patch_size: int = 64,
+                      k: int = 5,
                       show_all: bool = False):
     """
-    Visualise les patchs sélectionnés (par exemple après tirage aléatoire pondéré).
-    
+    Tire aléatoirement k patchs pondérés par leur score et les affiche sur l'image.
+
     Args:
         image: Image originale (H, W, C)
-        selected_patches: Liste des patchs (x, y, score) déjà sélectionnés
-        patch_size: Taille des patchs (carrés)
-        show_all: Si True, affiche une carte de chaleur des scores
+        patch_scores: Liste de tuples (x, y, score)
+        patch_size: Taille des patchs
+        k: Nombre de patchs à afficher
+        show_all: Si True, affiche aussi une heatmap des scores
     """
+    if len(patch_scores) < k:
+        raise ValueError("Pas assez de patchs pour en sélectionner k")
+
+    # Tirage aléatoire pondéré par les scores
+    scores = np.array([float(s[2]) for s in patch_scores])
+    scores = np.clip(scores, a_min=0, a_max=None)
+    if scores.sum() == 0:
+        probs = np.ones_like(scores) / len(scores)
+    else:
+        probs = scores / scores.sum()
     
+    selected_indices = np.random.choice(len(patch_scores), size=k, replace=False, p=probs)
+    selected_patches = [patch_scores[i] for i in selected_indices]
+
+    # Affichage
     if show_all:
-        # Création d'une carte de chaleur des scores
         h, w = image.shape[:2]
         heatmap = np.zeros((h, w))
-        
-        for x, y, score in selected_patches:
+        for x, y, score in patch_scores:
             heatmap[y:y+patch_size, x:x+patch_size] = np.maximum(
                 heatmap[y:y+patch_size, x:x+patch_size], score
             )
-        
         fig, axes = plt.subplots(1, 2, figsize=(15, 6))
-        
         axes[0].imshow(image)
         axes[0].set_title('Image originale')
         axes[0].axis('off')
-        
         im = axes[1].imshow(heatmap, cmap='hot', alpha=0.7)
         axes[1].imshow(image, alpha=0.3)
-        axes[1].set_title('Carte de chaleur des patchs sélectionnés')
+        axes[1].set_title('Carte de chaleur des scores')
         axes[1].axis('off')
         plt.colorbar(im, ax=axes[1])
-        
     else:
-        # Affichage des patchs sélectionnés
         fig, ax = plt.subplots(figsize=(12, 8))
         ax.imshow(image)
-        
-        for i, (x, y, score) in enumerate(selected_patches):
+        for x, y, score in selected_patches:
             rect = plt.Rectangle((x, y), patch_size, patch_size, 
                                  fill=False, edgecolor='red', linewidth=2)
             ax.add_patch(rect)
-            ax.text(x, y-5, f'{score:.3f}', color='red', fontweight='bold')
-        
-        ax.set_title(f'{len(selected_patches)} patchs sélectionnés')
+            ax.text(x, y - 5, f'{float(score):.3f}', color='red', fontweight='bold')
+        ax.set_title(f'{k} patchs sélectionnés (tirage pondéré)')
         ax.axis('off')
-    
+
     plt.tight_layout()
     plt.show()
 
@@ -313,6 +320,8 @@ def extract_patches_array_with_dog(image: np.ndarray,
     
     return np.array(patches)
 
+
+
 def sample_weighted_patches(patch_scores: List[Tuple[int, int, float]], 
                              k: int = 5) -> List[Tuple[int, int, float]]:
     """
@@ -349,7 +358,7 @@ def get_contour(image,kl=1):
 
 
 if __name__ == "__main__":
-    patch_size = 32
+    patch_size = 64
     stride = patch_size // 2
     nb_patches = 5
     sigma1 = 1.0
