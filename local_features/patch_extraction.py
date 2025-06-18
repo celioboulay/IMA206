@@ -215,19 +215,17 @@ def get_top_patches(patch_scores: List[Tuple[int, int, float]],
     return sorted(patch_scores, key=lambda x: x[2], reverse=True)[:top_k]
 
 def visualize_patches(image: np.ndarray, 
-                     patch_scores: List[Tuple[int, int, float]], 
-                     patch_size: int = 64,
-                     top_k: int = 10,
-                     show_all: bool = False):
+                      selected_patches: List[Tuple[int, int, float]],
+                      patch_size: int = 64,
+                      show_all: bool = False):
     """
-    Visualise les patchs avec les scores de gradient les plus élevés.
+    Visualise les patchs sélectionnés (par exemple après tirage aléatoire pondéré).
     
     Args:
-        image: Image originale
-        patch_scores: Liste des scores de patchs
-        patch_size: Taille des patchs
-        top_k: Nombre de patchs à afficher
-        show_all: Si True, affiche tous les patchs avec une carte de chaleur
+        image: Image originale (H, W, C)
+        selected_patches: Liste des patchs (x, y, score) déjà sélectionnés
+        patch_size: Taille des patchs (carrés)
+        show_all: Si True, affiche une carte de chaleur des scores
     """
     
     if show_all:
@@ -235,7 +233,7 @@ def visualize_patches(image: np.ndarray,
         h, w = image.shape[:2]
         heatmap = np.zeros((h, w))
         
-        for x, y, score in patch_scores:
+        for x, y, score in selected_patches:
             heatmap[y:y+patch_size, x:x+patch_size] = np.maximum(
                 heatmap[y:y+patch_size, x:x+patch_size], score
             )
@@ -248,27 +246,22 @@ def visualize_patches(image: np.ndarray,
         
         im = axes[1].imshow(heatmap, cmap='hot', alpha=0.7)
         axes[1].imshow(image, alpha=0.3)
-        axes[1].set_title('Carte de chaleur des gradients')
+        axes[1].set_title('Carte de chaleur des patchs sélectionnés')
         axes[1].axis('off')
         plt.colorbar(im, ax=axes[1])
         
     else:
-        # Affichage des top k patchs
-        top_patches = get_top_patches(patch_scores, top_k)
-        
+        # Affichage des patchs sélectionnés
         fig, ax = plt.subplots(figsize=(12, 8))
         ax.imshow(image)
         
-        for i, (x, y, score) in enumerate(top_patches):
-            # Dessiner un rectangle autour du patch
+        for i, (x, y, score) in enumerate(selected_patches):
             rect = plt.Rectangle((x, y), patch_size, patch_size, 
-                               fill=False, edgecolor='red', linewidth=2)
+                                 fill=False, edgecolor='red', linewidth=2)
             ax.add_patch(rect)
-            
-            # Ajouter le score comme texte
             ax.text(x, y-5, f'{score:.3f}', color='red', fontweight='bold')
         
-        ax.set_title(f'Top {top_k} patchs avec les gradients les plus élevés')
+        ax.set_title(f'{len(selected_patches)} patchs sélectionnés')
         ax.axis('off')
     
     plt.tight_layout()
@@ -300,7 +293,7 @@ def extract_patches_array_with_dog(image: np.ndarray,
     """
     
     if top_k is not None:
-        patches_to_extract = get_top_patches(patch_scores, top_k)
+        patches_to_extract = sample_weighted_patches(patch_scores, top_k)
     else:
         patches_to_extract = patch_scores
     
@@ -320,11 +313,40 @@ def extract_patches_array_with_dog(image: np.ndarray,
     
     return np.array(patches)
 
+def sample_weighted_patches(patch_scores: List[Tuple[int, int, float]], 
+                             k: int = 5) -> List[Tuple[int, int, float]]:
+    """
+    Tire k patchs au hasard en suivant une distribution pondérée par leur score.
+    
+    Args:
+        patch_scores: Liste de tuples (x, y, score)
+        k: Nombre de patchs à tirer
+    
+    Returns:
+        Liste de k patchs tirés aléatoirement selon la distribution des scores
+    """
+    if len(patch_scores) < k:
+        raise ValueError("Pas assez de patchs pour en tirer k.")
+
+    scores = np.array([s[2] for s in patch_scores])
+    scores = np.clip(scores, a_min=0, a_max=None)  # éviter les valeurs négatives
+    if scores.sum() == 0:
+        probs = np.ones_like(scores) / len(scores)
+    else:
+        probs = scores / scores.sum()
+
+    indices = np.random.choice(len(patch_scores), size=k, replace=False, p=probs)
+    return [patch_scores[i] for i in indices]
+
+
+
 def get_contour(image,kl=1):
     kernel_size = 2*kl+1
     blurred = cv2.GaussianBlur(image, (kernel_size, kernel_size), 100)
     gradient = _compute_single_channel_gradient(blurred, 'sobel')
     return gradient
+
+
 
 if __name__ == "__main__":
     patch_size = 32
