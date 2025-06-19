@@ -36,13 +36,12 @@ def compute(data_path, embedding_dir, device) :
         
         image_extensions = (".jpg", ".jpeg", ".png")
 
-        for root, dirs, files in os.walk(data_dir):
+        for root, dirs, files in os.walk(data_path):
             for file in files:
                 if file.lower().endswith(image_extensions):
                     image_path = os.path.join(root, file)
                     print(f"Found image: {image_path}")
 
-                    #Extraction des patchs de l'image
                     #Extraction des patchs de l'image
                     image = cv2.imread(data_path)
                     if image is None:
@@ -51,8 +50,6 @@ def compute(data_path, embedding_dir, device) :
                     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
                     patch_scores, selected_patches = extract_patch(image)
-                    print(selected_patches.shape)
-                    ext.visualize_patches(image, patch_scores, patch_size=64, k = 5)
 
                     #Passage dans la VAE
                     embedding = []
@@ -68,8 +65,6 @@ def compute(data_path, embedding_dir, device) :
 
                     # Concatène tous les embedding de patchs
                     merged_embedding = torch.cat(embedding, dim=0)  # shape: (5*d,)
-
-                    embedding = []
 
 
                     # On sauvegarde l'embedding dans le dossier spécifié
