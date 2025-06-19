@@ -10,6 +10,9 @@ data_contour_patch/
 
 local_features/weights/
 
+local_features/reduced dataset/
+
+
 celeb/
 
 embeddings/
