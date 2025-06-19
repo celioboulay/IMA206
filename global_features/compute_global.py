@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from utils.transformations_init import *
 from global_features.get_embeddings  import *
-from global_features.simCLR_like import global_SSL
+from global_features.simCLR_like_ import global_SSL
 
 
 '''def load_model(device, model_path):
@@ -71,7 +71,7 @@ def compute(data_path, embedding_dir, device):
 
 
 if __name__ == "__main__":
-    data_path = "../Data"
+    data_path = "./Data"
     embedding_dir = "../embeddings/global"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     compute(data_path, embedding_dir, device)
