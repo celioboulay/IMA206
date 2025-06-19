@@ -25,9 +25,9 @@ def extract_patch(image):
 def compute(data_path, embedding_dir, device) :
 
     #On initialise notre modèle
-    device = torch.device('cuda')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     vae_model = VanillaVAE(in_channels=1, latent_dim=64, kld_weight=1e-3).to(device)
-    checkpoint = torch.load("./vae_checkpoint_epoch4_batch44345.pt", map_location=torch.device('cuda'))
+    checkpoint = torch.load("local_features/vae_checkpoint_epoch4_batch44345.pt", map_location=torch.device('cuda'))
     vae_model.load_state_dict(checkpoint['model_state_dict'])
     vae_model.eval()
     
