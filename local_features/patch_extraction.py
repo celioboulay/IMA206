@@ -335,7 +335,8 @@ def sample_weighted_patches(patch_scores: List[Tuple[int, int, float]],
         Liste de k patchs tirés aléatoirement selon la distribution des scores
     """
     if len(patch_scores) < k:
-        raise ValueError("Pas assez de patchs pour en tirer k.")
+        k = len(patch_scores)
+
 
     scores = np.array([s[2] for s in patch_scores])
     scores = np.clip(scores, a_min=0, a_max=None)  # éviter les valeurs négatives
