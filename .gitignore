@@ -4,4 +4,12 @@ __pycache__/
 
 Data/
 
+data_patch/
+
+data_contour_patch/
+
+local_features/weights/
+
+celeb/
+
 embeddings/
