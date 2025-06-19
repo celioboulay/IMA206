@@ -9,7 +9,6 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 import torch.optim as optim
 
-from simCLR_like import dataset_simCLR, nt_xent_loss, augment_transform
 
 
 def global_SSL(data_path, device, f_theta, n_epochs=10, batch_size=32, lr=1e-3, weight_decay=1e-6, temperature=0.5):  # simCLR-like implementation for fine tunning f_theta_2
