@@ -1,18 +1,14 @@
 import argparse
-import os
-
 import torch
-import torch.nn as nn
-import torchvision.transforms as transforms
 
-import numpy as np
-import matplotlib.pyplot as plt
-from tqdm import tqdm
+import utils.merge_embeddings
+import utils.visualize
+print(torch.hub.get_dir())
 
 from global_features import compute_global
 from local_features import compute_local
 import utils
-from clusering.clustering import cluster
+from clustering.clustering import cluster
 
 
 
@@ -46,10 +42,10 @@ def main():    # python main.py --data_path ./Data/ --embedding_dir ./embeddings
         compute_global.compute(args.data_path, args.embedding_dir, device)  # f_theta_2
 
     
-    utils.merge_embeddings(args.embedding_dir, device, merged_embeddings_path='./clustering/z_merged.pt') # f_alpha  # verif les paths
+    utils.merge_embeddings.merge(args.embedding_dir, output_file='clustering/z_merged.pt') # f_alpha  # verif les paths
     clusters = cluster(args.embedding_dir, device, method='dec')    # dec agit sur f_alpha
 
-    utils.visualize(clusters, device)
+    utils.visualize.display(clusters, device)
 
 
 if __name__ == "__main__":

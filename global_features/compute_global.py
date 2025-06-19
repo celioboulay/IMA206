@@ -1,4 +1,9 @@
+import sys
 import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
+sys.path.insert(0, parent_dir)
+
 import torch
 from torchvision import transforms
 from PIL import Image
@@ -7,31 +12,59 @@ from torchvision import datasets, models
 from torch.utils.data import DataLoader, Dataset
 
 from utils.transformations_init import *
-from init_global import init
-from simCLR_like import global_SSL
+from global_features.get_embeddings  import *
+from global_features.simCLR_like import global_SSL
 
 
-def compute_features(model, device): # dans compute_global parce que peut etre ca depend de la scale
-    pass
+'''def load_model(device, model_path):
+    model = timm.create_model('vit_large_patch16_224', pretrained=False)  
+    model.load_state_dict(torch.load(model_path, map_location=device))
+    model.to(device)
+    return model'''
 
+from torchvision.models.feature_extraction import create_feature_extractor
 
-
-def process_features(features_tensor):  # pour ramener les features extraites a la forme choisie, a savoir un .pt pour le moment
+def load_model(device, model_name):
+    try:
+        model = timm.create_model(model_name, pretrained=True)
+        if hasattr(model, 'forward_features'):
+            model.get_embedding = model.forward_features
+        else:
+            model.get_embedding = lambda x: model.forward(x)
     
-    embeddings=None
+    except Exception:
+        if model_name == 'resnet50':
+            base_model = models.resnet50(pretrained=True)
+            return_nodes = {'avgpool': 'features'}
+            extractor = create_feature_extractor(base_model, return_nodes=return_nodes)
+            extractor.get_embedding = lambda x: extractor(x)['features'].squeeze(-1).squeeze(-1)
+            model = extractor
 
-    return embeddings
+        # elif model_name == 'custom_vit':
+        #     from my_models import CustomViT
+        #     model = CustomViT()
+        #     model.load_pretrained_weights()  
+        #     model.get_embedding = model.forward
+
+        else:
+            raise ValueError(f"Modèle {model_name} non reconnu.")
+
+    return model
+
 
 
 def compute(data_path, embedding_dir, device):
 
+    dataset = datasets.ImageFolder(data_path, transform=transform_local_center)
+    dataloader = DataLoader(dataset, batch_size=32, shuffle=False)
+
     f_theta_2 = timm.create_model('vit_large_patch16_224', pretrained=True) # modele temporaire pour simplifier le squelette
-    # f_theta_2 = load_model(device, model)
+    # f_theta_2 = load_model
     f_theta_2.to(device)
     f_theta_2.eval()
 
-    features_tensor = init(data_path, device, model=f_theta_2)
-    global_SSL(data_path, features_tensor, device, f_theta_2)
-    features_tensor = compute_features(data_path)
+    # global SLL args a passer dans compute
+    f_theta_2 = global_SSL(data_path, device, f_theta_2, n_epochs=1, batch_size=8, lr=1e-3, weight_decay=1e-6, temperature=0.5)  # data_path parce quon va charger un dataset different
+    features_tensor = get_embeddings(dataloader, device, model=f_theta_2)
     embeddings = process_features(features_tensor)
     torch.save(embeddings, embedding_dir+"/global_embeddings.pt")
