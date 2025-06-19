@@ -38,8 +38,10 @@ def main():    # python main.py --data_path ./Data/ --embedding_dir ./embeddings
 
 
     if args.recompute_embeddings:
-        compute_local.compute(args.data_path, args.embedding_dir, device)  # f_theta_1
-        compute_global.compute(args.data_path, args.embedding_dir, device)  # f_theta_2
+        #compute_local.compute(args.data_path, args.embedding_dir, device)  # f_theta_1
+        local_embeddings = torch.load(f"{args.embedding_dir}/local/embeddings.pt", map_location=device)
+        print("Loaded local embeddings:", local_embeddings.keys() if hasattr(local_embeddings, 'keys') else type(local_embeddings))
+        #compute_global.compute(args.data_path, args.embedding_dir, device)  # f_theta_2
 
     
     utils.merge_embeddings.merge(args.embedding_dir, output_file='clustering/z_merged.pt') # f_alpha  # verif les paths
