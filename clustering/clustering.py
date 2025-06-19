@@ -30,7 +30,16 @@ if __name__ == "__main__":
 
     embeddings = np.vstack(embeddings)
 
-    bgmm = cluster(embeddings)
+    if True:
+        bgmm = cluster(embeddings)
+        # Sauvegarde du modèle
+        model_path = os.path.join(emb_dir, "bgmm_model.joblib")
+        joblib.dump(bgmm, model_path)
+    else:
+        # Chargement du modèle
+        model_path = os.path.join(emb_dir, "bgmm_model.joblib")
+        bgmm = joblib.load(model_path)
+
     painting_probs = bgmm.predict_proba(embeddings)
 
     painter_probs = defaultdict(list)
