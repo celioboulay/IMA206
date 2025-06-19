@@ -68,3 +68,10 @@ def compute(data_path, embedding_dir, device):
     features_tensor = get_embeddings(dataloader, device, model=f_theta_2)
     embeddings = process_features(features_tensor)
     torch.save(embeddings, embedding_dir+"/global_embeddings.pt")
+
+
+if __name__ == "__main__":
+    data_path = "../Data"
+    embedding_dir = "../embeddings/global"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    compute(data_path, embedding_dir, device)
