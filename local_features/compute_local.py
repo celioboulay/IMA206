@@ -25,9 +25,9 @@ def extract_patch(image):
 def compute(data_path, embedding_dir, device) :
 
     #On initialise notre modèle
-    device = torch.device('cuda')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     vae_model = VanillaVAE(in_channels=1, latent_dim=64, kld_weight=1e-3).to(device)
-    checkpoint = torch.load("./vae_checkpoint_epoch4_batch44345.pt", map_location=torch.device('cuda'))
+    checkpoint = torch.load("local_features/vae_checkpoint_epoch4_batch44345.pt", map_location=torch.device('cuda'))
     vae_model.load_state_dict(checkpoint['model_state_dict'])
     vae_model.eval()
     
@@ -36,7 +36,7 @@ def compute(data_path, embedding_dir, device) :
         
         image_extensions = (".jpg", ".jpeg", ".png")
 
-        for root, dirs, files in os.walk(data_dir):
+        for root, dirs, files in os.walk(data_path):
             for file in files:
                 if file.lower().endswith(image_extensions):
                     image_path = os.path.join(root, file)
@@ -75,3 +75,10 @@ def compute(data_path, embedding_dir, device) :
                     # On sauvegarde l'embedding dans le dossier spécifié
                     embedding_path = os.path.join(embedding_dir, f"{os.path.splitext(file)[0]}_embedding.pt")
                     torch.save(merged_embedding, embedding_path)
+
+if __name__ == "__main__":
+    data_path = "/Data"  # Replace with your image directory
+    embedding_dir = "/embeddings"  # Replace with your embedding directory
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    compute(data_path, embedding_dir, device)
