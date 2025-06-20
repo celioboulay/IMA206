@@ -13,7 +13,14 @@ local_features/weights/
 
 local_features/reduced dataset/
 
-
 celeb/
 
+embeddings/model/
+embeddings/global_with_ssl/
+embeddings/global/
+embeddings/local/
 embeddings/
+
+reduced_dataset/
+
+embeddings/local/

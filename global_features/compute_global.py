@@ -22,6 +22,8 @@ from global_features.simCLR_like_ import global_SSL
     model.to(device)
     return model'''
 
+
+
 from torchvision.models.feature_extraction import create_feature_extractor
 
 def load_model(device, model_name):
@@ -56,7 +58,7 @@ def load_model(device, model_name):
 def compute(data_path, embedding_dir, device):
 
     dataset = datasets.ImageFolder(data_path, transform=transform_local_center)
-    dataloader = DataLoader(dataset, batch_size=32, shuffle=False)
+    dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
 
     f_theta_2 = timm.create_model('vit_large_patch16_224', pretrained=True) # modele temporaire pour simplifier le squelette
     # f_theta_2 = load_model
@@ -64,14 +66,18 @@ def compute(data_path, embedding_dir, device):
     f_theta_2.eval()
 
     # global SLL args a passer dans compute
-    f_theta_2 = global_SSL(data_path, device, f_theta_2, n_epochs=1, batch_size=8, lr=1e-3, weight_decay=1e-6, temperature=0.5)  # data_path parce quon va charger un dataset different
-    features_tensor = get_embeddings(dataloader, device, model=f_theta_2)
-    embeddings = process_features(features_tensor)
-    torch.save(embeddings, embedding_dir+"/global_embeddings.pt")
+    if True:
+        f_theta_2 = global_SSL(data_path, device, f_theta_2, n_epochs=5, batch_size=8, lr=2e-3, weight_decay=1e-6, temperature=0.1)  # data_path parce quon va charger un dataset different
+        torch.save(f_theta_2.state_dict(), os.path.join(embedding_dir, "global_ssl_model.pth"))
+    else:
+        f_theta_2.load_state_dict(torch.load(os.path.join(embedding_dir, "global_ssl_model.pth"), map_location=device))
+    get_embeddings(dataloader,data_path, embedding_dir, device, model=f_theta_2)
+    #embeddings = process_features(features_tensor)
+    #torch.save(embeddings, embedding_dir+"/global_embeddings.pt")
 
 
 if __name__ == "__main__":
     data_path = "./Data"
-    embedding_dir = "../embeddings/global"
+    embedding_dir = "./embeddings/global_with_ssl"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     compute(data_path, embedding_dir, device)
