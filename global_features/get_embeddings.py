@@ -16,6 +16,7 @@ from torchvision.datasets import ImageFolder
 from tqdm import tqdm
 
 import cv2
+import cv2
 
 def imread_unicode(path):
     """Lit une image même si le chemin contient des caractères spéciaux."""
