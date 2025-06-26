@@ -15,6 +15,7 @@ local_features/reduced dataset/
 
 celeb/
 
+<<<<<<< HEAD
 embeddings/model/
 embeddings/global_with_ssl/
 embeddings/global/
@@ -24,3 +25,6 @@ embeddings/
 reduced_dataset/
 
 embeddings/local/
+=======
+embeddings/
+>>>>>>> f1586e32b3d1831e1e6d0c40bb6a50d4f4375475
